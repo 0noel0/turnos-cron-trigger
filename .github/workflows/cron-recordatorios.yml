@@ -1,0 +1,35 @@
+name: Recordatorios
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  recordatorios:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Llamar endpoint
+        run: |
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" --max-time 25 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://productividad-turnos.vercel.app/api/cron/recordatorios)
+          BODY=$(echo "$RESPONSE" | sed -e 's/HTTP_STATUS:.*//')
+          STATUS=$(echo "$RESPONSE" | tr -d '\n' | sed -e 's/.*HTTP_STATUS://')
+          echo "HTTP status: $STATUS"
+          echo "Respuesta: $BODY"
+          [ "$STATUS" = "200" ] || exit 1
+
+  fin-de-mes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Llamar endpoint
+        run: |
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" --max-time 25 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://productividad-turnos.vercel.app/api/cron/fin-de-mes)
+          BODY=$(echo "$RESPONSE" | sed -e 's/HTTP_STATUS:.*//')
+          STATUS=$(echo "$RESPONSE" | tr -d '\n' | sed -e 's/.*HTTP_STATUS://')
+          echo "HTTP status: $STATUS"
+          echo "Respuesta: $BODY"
+          [ "$STATUS" = "200" ] || exit 1
